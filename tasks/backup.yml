@@ -1,0 +1,59 @@
+---
+
+- name: get list of backup files
+  shell: "ls {{ cpar_basedir }}/backup"
+  register: backup_files
+  ignore_errors: yes
+  changed_when: False
+
+- name: get list of license files
+  shell: "ls {{ cpar_basedir }}/license"
+  register: license_files
+  ignore_errors: yes
+  changed_when: False
+
+- name: get list of tcl scripts files
+  shell: "ls {{ cpar_basedir }}/scripts/radius/tcl"
+  register: script_files
+  ignore_errors: yes
+  changed_when: False
+
+- name: ensure backup directory exist
+  file:
+    path: "~/{{ cpar_backup_prefix }}/{{ ansible_date_time.date }}"
+    state: directory
+    mode: 0755
+
+- name: fetch backups
+  fetch:
+    src: "{{ cpar_basedir }}/backup/{{ item }}"
+    dest: "~/{{ cpar_backup_prefix }}/{{ ansible_date_time.date }}"
+  with_items:
+    - "{{ backup_files.stdout_lines }}"
+
+- name: fetch tcl scripts
+  fetch:
+    src: "{{ cpar_basedir }}/scripts/radius/tcl/{{ item }}"
+    dest: "~/{{ cpar_backup_prefix }}/{{ ansible_date_time.date }}"
+  with_items:
+    - "{{ script_files.stdout_lines }}"
+
+- name: fetch licenses
+  fetch:
+    src: "{{ cpar_basedir }}/license/{{ item }}"
+    dest: "~/{{ cpar_backup_prefix }}/{{ ansible_date_time.date }}"
+  with_items:
+    - "{{ license_files.stdout_lines }}"
+
+- name: get cpar ls output
+  command: "{{ cpar_basedir }}/bin/aregcmd -C localhost -N {{ cpar_user }} -P {{ cpar_password }} ls -R"
+  register: cpar_ls_output
+  changed_when: False
+
+- name: save cpar_ls_output to file
+  copy:
+    content: "{{ cpar_ls_output.stdout }}" 
+    dest: "~/{{ cpar_backup_prefix }}/{{ ansible_date_time.date }}/{{ inventory_hostname }}/cpar_ls_output.txt"
+  become: False
+  delegate_to: localhost
+

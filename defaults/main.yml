@@ -1,0 +1,10 @@
+---
+
+cpar_user: "admin"
+cpar_password: "secret"
+cpar_basedir: "/opt/CSCOar"
+
+#Backup dir will be $HOME/$prefix/$date
+cpar_backup_prefix: "backup"
+
+tests_enabled: False

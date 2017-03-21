@@ -1,0 +1,27 @@
+---
+
+- name: Test Architecture
+  assert:
+    that:
+      - "ansible_architecture == 'x86_64'"
+    msg: "Architecture must be x86_64."
+
+- name: Test Distribution
+  assert:
+    that:
+      - "ansible_distribution == 'RedHat'"
+    msg: "Distribution must be RedHat."
+
+- name: Test Distribution Release
+  assert:
+    that:
+      - "ansible_distribution_major_version == '6' or ansible_distribution_major_version == '7'"
+    msg: "Distribution must be RedHat 6 or 7."
+
+- name: Include backup.yml
+  include: backup.yml
+
+- name: Include tests.yml
+  include: tests.yml
+  when: 
+    - tests_enabled
